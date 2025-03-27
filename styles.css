@@ -1,0 +1,33 @@
+/* Set the background of the page */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #A7D8FF; /* Pastel blue */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Game container for positioning */
+#game-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* The game board */
+#game-board {
+    background-color: #90EE90; /* Light green for the game area */
+    border: 2px solid #4682B4;
+    border-radius: 8px;
+}
+
+/* Score display */
+#score-board {
+    margin-top: 20px;
+    font-size: 18px;
+    font-family: Arial, sans-serif;
+    color: #333;
+}
