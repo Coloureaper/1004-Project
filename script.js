@@ -1,20 +1,21 @@
 const canvas = document.getElementById('game-board');
 const ctx = canvas.getContext('2d');
 
-const gridSize = 10;  // Size of each unit (both snake and fruit)
-const boardSize = 400;  // Size of the game canvas
+const gridSize = 10;
+const boardSize = 400;
 
 let snake = [
     { x: 150, y: 150 },
     { x: 140, y: 150 },
     { x: 130, y: 150 }
-]; // Snake starts with 3 segments
+];
 let direction = 'RIGHT';
-let fruits = []; // Array to hold fruits
+let fruits = [];
 let traps = [];
 let score = 0;
+let highScore = 0;
 let gameOver = false;
-let gameInterval = 100; // Initial interval (100ms between each game update)
+let gameInterval = 100;
 
 // Function to generate random positions for fruits and traps
 function randomPosition() {
@@ -25,11 +26,10 @@ function randomPosition() {
 
 // Initialize fruits and traps
 function spawnFruits() {
-    // Spawn 3 fruits at random positions if the fruits array is empty
     while (fruits.length < 3) {
         const fruit = randomPosition();
         if (!fruits.some(existingFruit => existingFruit.x === fruit.x && existingFruit.y === fruit.y)) {
-            fruits.push(fruit);  // Only add a new fruit if it's not overlapping
+            fruits.push(fruit);
         }
     }
 }
@@ -41,12 +41,14 @@ function spawnTraps() {
 
 // Update the game state
 function updateGame() {
-    if (gameOver) return;
+    if (gameOver) {
+        updateHighScore();  // Update high score if needed when the game ends
+        return;
+    }
 
     moveSnake();
     checkCollisions();
     updateCanvas();
-    checkSpeedIncrease();
 }
 
 // Move snake based on current direction
@@ -58,26 +60,21 @@ function moveSnake() {
     if (direction === 'LEFT') head.x -= gridSize;
     if (direction === 'RIGHT') head.x += gridSize;
 
-    snake.unshift(head);  // Add new head at the front
+    snake.unshift(head);
 
-    // Check if the snake eats a fruit
     for (let i = 0; i < fruits.length; i++) {
         if (head.x === fruits[i].x && head.y === fruits[i].y) {
             score++;
             document.getElementById('score').textContent = score;
 
-            // Remove the eaten fruit
             fruits.splice(i, 1);
-
-            // Respawn only the eaten fruit
             fruits.push(randomPosition());
 
-            spawnTraps();  // Spawn a new trap
-            return;  // Don't remove the tail if fruit is eaten
+            spawnTraps();
+            return;
         }
     }
 
-    // Remove tail if no fruit is eaten
     snake.pop();
 }
 
@@ -85,19 +82,16 @@ function moveSnake() {
 function checkCollisions() {
     const head = snake[0];
 
-    // Collision with walls
     if (head.x < 0 || head.x >= boardSize || head.y < 0 || head.y >= boardSize) {
         gameOver = true;
     }
 
-    // Collision with itself
     for (let i = 1; i < snake.length; i++) {
         if (snake[i].x === head.x && snake[i].y === head.y) {
             gameOver = true;
         }
     }
 
-    // Collision with traps
     for (let i = 0; i < traps.length; i++) {
         if (traps[i].x === head.x && traps[i].y === head.y) {
             gameOver = true;
@@ -107,63 +101,30 @@ function checkCollisions() {
 
 // Update the canvas with the snake, fruits, and traps
 function updateCanvas() {
-    ctx.clearRect(0, 0, boardSize, boardSize);  // Clear previous frame
+    ctx.clearRect(0, 0, boardSize, boardSize);
 
-    // Draw the snake (blue color)
     snake.forEach(segment => {
-        ctx.fillStyle = "#1E90FF";  // Snake color: Blue
+        ctx.fillStyle = "#1E90FF";
         ctx.fillRect(segment.x, segment.y, gridSize, gridSize);
     });
 
-    // Draw the fruits (red circles)
     fruits.forEach(fruit => {
-        ctx.fillStyle = "#FF6347";  // Fruit color (Tomato)
+        ctx.fillStyle = "#FF6347";
         ctx.beginPath();
         ctx.arc(fruit.x + gridSize / 2, fruit.y + gridSize / 2, gridSize / 2, 0, Math.PI * 2);
         ctx.fill();
     });
 
-    // Draw the traps (red squares)
     traps.forEach(trap => {
-        ctx.fillStyle = "#FF0000";  // Trap color (Red)
-        ctx.fillRect(trap.x, trap.y, gridSize, gridSize);  // Trap as square
+        ctx.fillStyle = "#FF0000";
+        ctx.fillRect(trap.x, trap.y, gridSize, gridSize);
     });
 
-    // Display game over message if game ends
     if (gameOver) {
         ctx.fillStyle = "black";
         ctx.font = "24px Arial";
         ctx.fillText(`Game Over! Score: ${score}`, 100, boardSize / 2);
     }
-}
-
-// Check if the snake's speed should increase (every 10 points)
-function checkSpeedIncrease() {
-    if (score >= 10 && score < 20) {
-        if (gameInterval !== 90) {
-            updateGameSpeed(80);
-        }
-    } else if (score >= 20 && score < 30) {
-        if (gameInterval !== 80) {
-            updateGameSpeed(60);
-        }
-    } else if (score >= 30 && score < 40) {
-        if (gameInterval !== 70) {
-            updateGameSpeed(40);
-        }
-    } else if (score >= 40 && score < 50) {
-        if (gameInterval !== 60) {
-            updateGameSpeed(20);
-        }
-    }
-    // Add more speed increase logic here if needed (50, 60 points, etc.)
-}
-
-// Update the game speed by adjusting the interval
-function updateGameSpeed(newInterval) {
-    gameInterval = newInterval;
-    clearInterval(gameIntervalID);
-    gameIntervalID = setInterval(updateGame, gameInterval);  // Update the game interval to a faster rate
 }
 
 // Listen for arrow key inputs
@@ -183,9 +144,53 @@ document.addEventListener('keydown', function(event) {
 function startGame() {
     spawnFruits();
     spawnTraps();
-    gameIntervalID = setInterval(updateGame, gameInterval);  // Start the game with the initial interval
+    gameIntervalID = setInterval(updateGame, gameInterval);
 }
 
-let gameIntervalID;  // Variable to hold the game interval ID
+// Reset the game
+function resetGame() {
+    snake = [
+        { x: 150, y: 150 },
+        { x: 140, y: 150 },
+        { x: 130, y: 150 }
+    ];
+    direction = 'RIGHT';
+    fruits = [];
+    traps = [];
+    score = 0;
+    gameOver = false;
+    document.getElementById('score').textContent = score;
+    
+    spawnFruits();
+    spawnTraps();
+    
+    clearInterval(gameIntervalID);
+    gameIntervalID = setInterval(updateGame, gameInterval);
 
+    updateCanvas();
+}
+
+// Update High Score if necessary
+function updateHighScore() {
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('highScore', highScore);  // Save to localStorage
+        document.getElementById('high-score').textContent = highScore;  // Update the displayed high score
+    }
+}
+
+// Load high score from localStorage
+function loadHighScore() {
+    const storedHighScore = localStorage.getItem('highScore');
+    if (storedHighScore) {
+        highScore = parseInt(storedHighScore);
+        document.getElementById('high-score').textContent = highScore;  // Display the loaded high score
+    }
+}
+
+// Add event listener to reset button
+document.getElementById('reset-button').addEventListener('click', resetGame);
+
+// Start the game
 startGame();
+loadHighScore();

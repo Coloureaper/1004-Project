@@ -31,3 +31,27 @@ body {
     font-family: Arial, sans-serif;
     color: #333;
 }
+
+/* High Score display */
+#high-score-board {
+    font-size: 18px;
+    font-family: Arial, sans-serif;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Reset button style */
+#reset-button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4682B4;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#reset-button:hover {
+    background-color: #315f86;
+}
